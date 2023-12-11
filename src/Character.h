@@ -9,13 +9,21 @@
 class Character{
 	private:
 		int numLines;
-		std::unordered_set<Character> talksTo;
+		std::unordered_set<std::string> talksTo;
 		std::vector<Scene> scenes;
 		std::string name;
 
 	public:
+
 		Character();
 		Character(std::string name);
+
+		int getNumLines();
+		std::string getName();
+		std::vector<std::string> getTalksTo();
+		std::vector<Scene> getScenes();
+		
 		void addLine(std::string line);
-		void addTalksTo(Character character);
-}
+		void addTalksTo(std::string character);
+		void addScene(Scene scene);
+};

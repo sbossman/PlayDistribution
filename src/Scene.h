@@ -7,7 +7,7 @@
 
 class Scene{
 	int lines;
-	std::unordered_set<Characters> characters;
+	std::unordered_set<std::string> characters;
 	int act;
 	int sceneNum;
 
@@ -15,8 +15,8 @@ class Scene{
 	Scene();
 	Scene(int act, int sceneNum);
 
-	void addLine(std::string line, Character character);
-	void addCharacter(Character character);
+	void addLine(std::string line, std::string character);
+	void addCharacter(std::string character);
 
 	void printScene();
-}
+};

@@ -5,11 +5,28 @@ Play::Play(std::string title, std::string author){
 	this->author = author;
 }
 
+Play::Play(std::string file){
+	readFromFile(file);
+}
+
+bool isAct(std::string line){
+	return std::regex_match(line, std::regex("^ACT [0-9]+$"));
+}
+
+bool isScene(std::string line){
+	return std::regex_match(line, std::regex("^Scene [0-9]+$"));
+}
+
+bool characterSpeaks(std::string line){
+	return std::regex_match(line, std::regex("^[A-Z][A-Z ]+*"));
+}
+
 int returnAct(std::string line){
 
 	std::string act = "";
 	for(int i = 4; i < line.size(); i++)
 		act += line[i];
+	std::cout << "Act:" << act <<std::endl;
 	return stoi(act);
 }
 
@@ -18,11 +35,12 @@ int returnScene(std::string line){
 	for(int i = 6; i < line.size(); i++)
 		scene += line[i];
 
+	std::cout << "Scene:" << scene <<std::endl;
 	return stoi(scene);
 }
 
 std::string returnCharacterName(std::string line){
-	bool justName = regex_match(line, regex("[A-Z ]+"));
+	bool justName = std::regex_match(line, std::regex("[A-Z ]+"));
 	if(justName)
 		return line;
 
@@ -60,22 +78,20 @@ void Play::readFromFile(std::string path){
 		author += line[i];
 	}
 
-	bool isAct = regex_match(line, regex("^ACT [0-9]+$"));
-	bool isScene = regex_match(line, regex("^Scene [0-9]+$"));
-	bool characterSpeaks = regex_search(line, regex("^[A-Z ]+"));
 	
 	// Skipping through the section until we actually get to the play
 	while(getline(file, line)){
-		if(isAct)
+		if(isAct(line))
 			break;
 	}
 
 	// We are now at the first act (ACT is contained in line)
+	std::cout << line <<std::endl;
 	int actNum = returnAct(line);
 	
 	// skipping until we receive the scene number
 	while(getline(file, line)){
-		if(isScene)
+		if(isScene(line))
 			break;
 	}
 
@@ -83,39 +99,45 @@ void Play::readFromFile(std::string path){
 	// Creates Scene with everything
 	Scene currScene = Scene(actNum, sceneNum);
 
+	std::cout << "here" << std::endl;
 	while(getline(file, line)){
-		if(characterSpeaks)
+		if(characterSpeaks(line))
 			break;
 	}
 
 	std::string characterName = returnCharacterName(line);
 	characters[characterName] = Character(characterName);
+
+	if(characterName.size() < line.size())
+		line = line.substr(characterName.size());
+	else
+		line = "";
 	// Loops through the current scene
 	// Then there's inner loop looking for characters speaking
 	// Then there's inner loop looking for lines
 
-	std::string currLine = "";
+	std::string currLine = line;
 
 	while(getline(file, line)){
-		if(isAct){
+		if(isAct(line)){
 			actNum = returnAct(line);
 			while(getline(file, line))
-				if(isScene) break;
+				if(isScene(line)) break;
 			sceneNum = returnScene(line);
 
 			scenes.push_back(currScene);
 			currScene = Scene(actNum, sceneNum);
 		}
 
-		if(characterSpeaks){
+		if(characterSpeaks(line)){
 			characters[characterName].addLine(currLine);
-			currScene.addLine(currLine, characters[characterName]);
+			currScene.addLine(currLine, characterName);
 			
 			characterName = returnCharacterName(line);
 			// if the rest of the line still contains text because a
 			// character spoke, it just takes the rest of the
 			// character's line
-			line = substring(characterName.size());
+			line = line.substr(characterName.size());
 
 			// adds character to Characters if their name wasn't found
 			// in the map of characters
@@ -135,7 +157,18 @@ void Play::readFromFile(std::string path){
 		currLine += "\n";
 	}
 
-	currScene.addLine(currLine, Characters[characterName]);
+	currScene.addLine(currLine, characterName);
 	scenes.push_back(currScene);
 	characters[characterName].addLine(currLine);
 }
+
+std::vector<Character> Play::getCharacters(){
+	std::vector<Character> chars;
+	auto iter = characters.begin();
+	for(; iter != characters.end(); iter++){
+		chars.push_back(iter->second);
+	}
+
+	return chars;
+}
+
