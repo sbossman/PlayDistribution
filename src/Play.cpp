@@ -18,7 +18,10 @@ bool isScene(std::string line){
 }
 
 bool characterSpeaks(std::string line){
-	return std::regex_match(line, std::regex("^[A-Z][A-Z ]+*"));
+	bool speaks = std::regex_match(line, std::regex("^[A-Z][A-Z][A-Z\t ]*"));
+	//if(speaks)
+	//	std::cout << line << std::endl;
+	return std::regex_search(line, std::regex("^[A-Z][A-Z][A-Z][A-Z]"));
 }
 
 int returnAct(std::string line){
@@ -45,6 +48,7 @@ std::string returnCharacterName(std::string line){
 		return line;
 
 	std::string consecCaps = "";
+	// TODO: adjust for the "LADY MACBETH" edgecase
 	for(int i = 0; i < line.size(); i++){
 		if(isupper(line[i]))
 			consecCaps += line[i];
@@ -53,7 +57,7 @@ std::string returnCharacterName(std::string line){
 	}
 
 	std::string name = "";
-	for(int i = 0; i < consecCaps.size() - 3; i++)
+	for(int i = 0; i < consecCaps.size(); i++)
 		name += consecCaps[i];
 
 	return name;
@@ -127,6 +131,17 @@ void Play::readFromFile(std::string path){
 
 			scenes.push_back(currScene);
 			currScene = Scene(actNum, sceneNum);
+		}
+
+
+		if(isScene(line)){
+			sceneNum = returnScene(line);
+
+			scenes.push_back(currScene);
+			currScene = Scene(actNum, sceneNum);
+			
+			while(getline(file, line))
+				if(characterSpeaks(line)) break;
 		}
 
 		if(characterSpeaks(line)){
