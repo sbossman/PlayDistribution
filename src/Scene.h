@@ -15,6 +15,12 @@ class Scene{
 	Scene();
 	Scene(int act, int sceneNum);
 
+	std::vector<std::string> getCharacters();
+	int getAct();
+	int getScene();
+
+	bool inScene(std::string character);
+
 	void addLine(std::string line, std::string character);
 	void addCharacter(std::string character);
 

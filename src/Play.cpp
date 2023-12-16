@@ -38,7 +38,6 @@ int returnScene(std::string line){
 	for(int i = 6; i < line.size(); i++)
 		scene += line[i];
 
-	std::cout << "Scene:" << scene <<std::endl;
 	return stoi(scene);
 }
 
@@ -103,13 +102,13 @@ void Play::readFromFile(std::string path){
 	// Creates Scene with everything
 	Scene currScene = Scene(actNum, sceneNum);
 
-	std::cout << "here" << std::endl;
 	while(getline(file, line)){
 		if(characterSpeaks(line))
 			break;
 	}
 
 	std::string characterName = returnCharacterName(line);
+	std::string prevCharName = "";
 	characters[characterName] = Character(characterName);
 
 	if(characterName.size() < line.size())
@@ -127,10 +126,6 @@ void Play::readFromFile(std::string path){
 			actNum = returnAct(line);
 			while(getline(file, line))
 				if(isScene(line)) break;
-			sceneNum = returnScene(line);
-
-			scenes.push_back(currScene);
-			currScene = Scene(actNum, sceneNum);
 		}
 
 
@@ -148,17 +143,24 @@ void Play::readFromFile(std::string path){
 			characters[characterName].addLine(currLine);
 			currScene.addLine(currLine, characterName);
 			
+			prevCharName = characterName;
+			
 			characterName = returnCharacterName(line);
 			// if the rest of the line still contains text because a
 			// character spoke, it just takes the rest of the
 			// character's line
+			currLine = "";
 			line = line.substr(characterName.size());
+
 
 			// adds character to Characters if their name wasn't found
 			// in the map of characters
 			if(characters.find(characterName) == characters.end()){
 				characters[characterName] = Character(characterName);
 			}
+
+			characters[characterName].addTalksTo(prevCharName);
+			characters[prevCharName].addTalksTo(characterName);
 		}
 		
 		// skips any random lines
@@ -175,7 +177,39 @@ void Play::readFromFile(std::string path){
 	currScene.addLine(currLine, characterName);
 	scenes.push_back(currScene);
 	characters[characterName].addLine(currLine);
+
+	for(int i = 0; i < scenes.size(); i++){
+		std::vector<std::string> chars = scenes[i].getCharacters();
+		for(int j = 0; j < chars.size(); j++){
+			characters[chars[j]].addScene(scenes[i]);
+		}
+
+	}
 }
+
+bool Play::inSceneTogether(std::string char1, std::string char2){
+	Character c1 = characters[char1];
+	Character c2 = characters[char2];
+
+	std::vector<Scene> scenesW1 = c1.getScenes();
+	for(int i = 0; i < scenesW1.size(); i++){
+		if(scenesW1[i].inScene(char2))
+			return true;
+	}
+	return false;
+}
+
+bool Play::talksTo(std::string char1, std::string char2){
+	Character c1 = characters[char1];
+	Character c2 = characters[char2];
+
+	std::vector<std::string> spTo = c1.getTalksTo();
+
+	return find(spTo.begin(), spTo.end(), char2) != spTo.end();
+}
+
+	
+
 
 std::vector<Character> Play::getCharacters(){
 	std::vector<Character> chars;
@@ -185,5 +219,11 @@ std::vector<Character> Play::getCharacters(){
 	}
 
 	return chars;
+}
+
+
+
+std::vector<Scene> Play::getScenes(){
+	return scenes;
 }
 

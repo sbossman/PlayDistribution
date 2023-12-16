@@ -10,8 +10,13 @@ Character::Character(std::string name){
 
 
 int Character::getNumLines(){
-	return numLines;
+	return lines.size();
 }
+
+std::vector<std::string> Character::getLines(){
+	return lines;
+}
+
 
 std::string Character::getName(){
 	return name;
@@ -36,6 +41,7 @@ std::vector<Scene> Character::getScenes(){
 
 void Character::addLine(std::string line){
 	numLines++;
+	lines.push_back(line);
 	//TODO: make this a better function (like actually create a 
 	//way of storing lines)
 }

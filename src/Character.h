@@ -12,6 +12,7 @@ class Character{
 		std::unordered_set<std::string> talksTo;
 		std::vector<Scene> scenes;
 		std::string name;
+		std::vector<std::string> lines;
 
 	public:
 
@@ -19,6 +20,7 @@ class Character{
 		Character(std::string name);
 
 		int getNumLines();
+		std::vector<std::string> getLines();
 		std::string getName();
 		std::vector<std::string> getTalksTo();
 		std::vector<Scene> getScenes();
@@ -26,4 +28,5 @@ class Character{
 		void addLine(std::string line);
 		void addTalksTo(std::string character);
 		void addScene(Scene scene);
+
 };

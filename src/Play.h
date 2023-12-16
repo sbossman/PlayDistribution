@@ -21,4 +21,8 @@ class Play{
 
 		void readFromFile(std::string file);
 		std::vector<Character> getCharacters();
+		std::vector<Scene> getScenes();
+
+		bool inSceneTogether(std::string char1, std::string char2);
+		bool talksTo(std::string char1, std::string char2);
 };
